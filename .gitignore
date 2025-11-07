@@ -1,23 +1,24 @@
-# Archivos de configuración locales
+*.log
+.DS_Store
 .env
 .env.backup
 .env.production
-
-# Plan de desarrollo (documentación interna)
-PLAN_BACKEND.md
-
-# Sistema operativo
-.DS_Store
-Thumbs.db
-
-# IDEs
-.idea/
-.vscode/
-.fleet/
 .phpactor.json
-
-# Logs
-*.log
-
-# Node modules
-node_modules/
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
