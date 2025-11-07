@@ -1,0 +1,18 @@
+{
+  "name": "xpressutc",
+  "version": "1.0.0",
+  "description": "Cafetería Escolar - Universidad Tecnológica de Coahuila",
+  "private": true,
+  "scripts": {
+    "dev:api": "cd api && composer run dev",
+    "dev:client": "cd api-client && npm run dev",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\" --names \"API,CLIENT\" --prefix-colors \"blue,green\"",
+    "install:api": "cd api && composer install",
+    "install:client": "cd api-client && npm install",
+    "install:all": "npm run install:api && npm run install:client",
+    "setup": "cd api && composer run setup && cd ../api-client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

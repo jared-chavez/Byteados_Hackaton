@@ -1,0 +1,23 @@
+# Archivos de configuración locales
+.env
+.env.backup
+.env.production
+
+# Plan de desarrollo (documentación interna)
+PLAN_BACKEND.md
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+.fleet/
+.phpactor.json
+
+# Logs
+*.log
+
+# Node modules
+node_modules/
