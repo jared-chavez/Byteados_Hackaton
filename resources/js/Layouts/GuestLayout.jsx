@@ -1,18 +1,20 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
+import '../../css/dashboard.css';
 
 export default function GuestLayout({ children }) {
     return (
-        <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0">
-            <div>
-                <Link href="/">
-                    <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
-                </Link>
-            </div>
-
-            <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
+        <div className="min-h-screen bg-[#0a0a0a]">
+            <nav className="bg-[#0f0f0f] border-b border-[#2a2a2a]">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <Link href="/" className="flex items-center gap-2 text-white hover:text-green-400 transition">
+                        <span className="text-2xl">☕</span>
+                        <span className="font-bold text-xl">XpressUTC</span>
+                    </Link>
+                </div>
+            </nav>
+            <main className="py-12">
                 {children}
-            </div>
+            </main>
         </div>
     );
 }

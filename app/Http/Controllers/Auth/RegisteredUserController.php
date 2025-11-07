@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,6 +32,12 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
+        try {
+            Log::info('Registro iniciado', ['email' => $request->email, 'name' => $request->name]);
+        } catch (\Exception $e) {
+            // Ignorar si no se puede loggear
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => [
@@ -49,7 +56,17 @@ class RegisteredUserController extends Controller
 
         // Extraer student_id del correo si es estudiante
         $studentId = null;
-1234567890123456
+        if ($validated['user_type'] === 'student') {
+            $studentId = InstitutionalEmail::extractStudentId($validated['email']);
+        }
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'user_type' => $validated['user_type'],
+            'student_id' => $studentId,
+            'phone' => $validated['phone'] ?? null,
+            'status' => 'active', // Establecer status por defecto
         ]);
 
         event(new Registered($user));
@@ -63,12 +80,19 @@ class RegisteredUserController extends Controller
             }
         } catch (\Exception $e) {
             // Si falla el envío del correo, continuar con el registro
-            \Log::warning('No se pudo enviar correo de verificación: ' . $e->getMessage());
+            Log::warning('No se pudo enviar correo de verificación: ' . $e->getMessage());
         }
 
         Auth::login($user);
         
         $request->session()->regenerate();
+        
+        try {
+            Log::info('Usuario registrado exitosamente', ['user_id' => $user->id, 'email' => $user->email]);
+        } catch (\Exception $e) {
+            // Ignorar si no se puede loggear
+        }
+        
         return redirect(route('dashboard', absolute: false));
     }
 }

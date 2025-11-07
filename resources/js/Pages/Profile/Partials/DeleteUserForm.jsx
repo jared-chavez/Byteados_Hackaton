@@ -1,11 +1,8 @@
-import DangerButton from '@/Components/DangerButton';
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
 import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
+import { FaExclamationTriangle } from 'react-icons/fa';
 
 export default function DeleteUserForm({ className = '' }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
@@ -46,45 +43,43 @@ export default function DeleteUserForm({ className = '' }) {
     };
 
     return (
-        <section className={`space-y-6 ${className}`}>
-            <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Delete Account
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600">
-                    Once your account is deleted, all of its resources and data
-                    will be permanently deleted. Before deleting your account,
-                    please download any data or information that you wish to
-                    retain.
+        <div className={`profile-card profile-card-danger ${className}`}>
+            <div className="profile-card-header">
+                <h2 className="profile-card-title">Eliminar Cuenta</h2>
+                <p className="profile-card-description">
+                    Una vez que se elimine tu cuenta, todos sus recursos y datos se eliminarán permanentemente. 
+                    Antes de eliminar tu cuenta, descarga cualquier dato o información que desees conservar.
                 </p>
-            </header>
+            </div>
 
-            <DangerButton onClick={confirmUserDeletion}>
-                Delete Account
-            </DangerButton>
+            <button
+                onClick={confirmUserDeletion}
+                className="dashboard-btn dashboard-btn-danger"
+            >
+                Eliminar Cuenta
+            </button>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900">
-                        Are you sure you want to delete your account?
-                    </h2>
+                <form onSubmit={deleteUser} className="profile-modal-form">
+                    <div className="profile-modal-header">
+                        <div className="profile-modal-icon">
+                            <FaExclamationTriangle className="w-8 h-8" />
+                        </div>
+                        <h2 className="profile-modal-title">
+                            ¿Estás seguro de que deseas eliminar tu cuenta?
+                        </h2>
+                    </div>
 
-                    <p className="mt-1 text-sm text-gray-600">
-                        Once your account is deleted, all of its resources and
-                        data will be permanently deleted. Please enter your
-                        password to confirm you would like to permanently delete
-                        your account.
+                    <p className="profile-modal-description">
+                        Una vez que se elimine tu cuenta, todos sus recursos y datos se eliminarán permanentemente. 
+                        Por favor, ingresa tu contraseña para confirmar que deseas eliminar permanentemente tu cuenta.
                     </p>
 
-                    <div className="mt-6">
-                        <InputLabel
-                            htmlFor="password"
-                            value="Password"
-                            className="sr-only"
-                        />
-
-                        <TextInput
+                    <div className="profile-form-group">
+                        <label htmlFor="password" className="profile-label">
+                            Contraseña *
+                        </label>
+                        <input
                             id="password"
                             type="password"
                             name="password"
@@ -93,28 +88,36 @@ export default function DeleteUserForm({ className = '' }) {
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
-                            className="mt-1 block w-3/4"
-                            isFocused
-                            placeholder="Password"
+                            className="profile-input"
+                            placeholder="Ingresa tu contraseña"
+                            required
                         />
 
                         <InputError
                             message={errors.password}
-                            className="mt-2"
+                            className="profile-error"
                         />
                     </div>
 
-                    <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal}>
-                            Cancel
-                        </SecondaryButton>
+                    <div className="profile-modal-actions">
+                        <button
+                            type="button"
+                            onClick={closeModal}
+                            className="dashboard-btn dashboard-btn-secondary"
+                        >
+                            Cancelar
+                        </button>
 
-                        <DangerButton className="ms-3" disabled={processing}>
-                            Delete Account
-                        </DangerButton>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="dashboard-btn dashboard-btn-danger"
+                        >
+                            {processing ? 'Eliminando...' : 'Eliminar Cuenta'}
+                        </button>
                     </div>
                 </form>
             </Modal>
-        </section>
+        </div>
     );
 }

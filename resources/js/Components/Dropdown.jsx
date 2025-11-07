@@ -1,5 +1,5 @@
 import { Transition } from '@headlessui/react';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { createContext, useContext, useState } from 'react';
 
 const DropDownContext = createContext();
@@ -87,6 +87,46 @@ const Content = ({
 };
 
 const DropdownLink = ({ className = '', children, ...props }) => {
+    // Manejar logout de forma especial para evitar conflictos
+    const handleLogout = (e) => {
+        e.preventDefault();
+        
+        // Usar router.post directamente para logout
+        router.post(route('logout'), {}, {
+            preserveState: false,
+            preserveScroll: false,
+            onFinish: () => {
+                // Forzar recarga completa de la página después del logout
+                // Esto asegura que no quede estado residual
+                setTimeout(() => {
+                    window.location.href = route('login');
+                }, 100);
+            },
+            onError: (errors) => {
+                // Incluso si hay error (como 409), redirigir al login
+                // El error puede ser por conflicto de sesión, pero el logout ya se procesó
+                console.warn('Error en logout (puede ser normal):', errors);
+                window.location.href = route('login');
+            },
+        });
+    };
+
+    // Si es logout, usar el handler especial con botón
+    if (props.href === route('logout') && props.method === 'post') {
+        return (
+            <button
+                type="button"
+                onClick={handleLogout}
+                className={
+                    'block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ' +
+                    className
+                }
+            >
+                {children}
+            </button>
+        );
+    }
+
     return (
         <Link
             {...props}

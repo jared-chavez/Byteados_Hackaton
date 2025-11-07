@@ -11,29 +11,30 @@ class InstitutionalEmail implements ValidationRule
     {
         $allowedDomains = [
             'utc.edu.mx',
-            'estudiantes.utc.edu.mx',
+            'alumno.utc.edu.mx',
             'maestros.utc.edu.mx',
         ];
 
         $domain = substr(strrchr($value, "@"), 1);
 
         if (!in_array($domain, $allowedDomains)) {
-            $fail('El correo debe ser institucional (@utc.edu.mx)');
+            $fail('El correo debe ser institucional (@utc.edu.mx, @alumno.utc.edu.mx o @maestros.utc.edu.mx)');
             return;
         }
 
         // Validar formato para estudiantes
-        if ($domain === 'estudiantes.utc.edu.mx') {
+        if ($domain === 'alumno.utc.edu.mx') {
             $localPart = substr($value, 0, strpos($value, '@'));
-            if (!preg_match('/^21\d{6}$/', $localPart)) {
-                $fail('El formato del correo estudiantil debe ser: 21XXXXXX@estudiantes.utc.edu.mx');
+            // Aceptar cualquier matrícula de 8 dígitos
+            if (!preg_match('/^\d{8}$/', $localPart)) {
+                $fail('El formato del correo estudiantil debe ser: XXXXXXXX@alumno.utc.edu.mx (8 dígitos)');
             }
         }
     }
 
     public static function extractStudentId(string $email): ?string
     {
-        if (strpos($email, '@estudiantes.utc.edu.mx') !== false) {
+        if (strpos($email, '@alumno.utc.edu.mx') !== false) {
             return substr($email, 0, strpos($email, '@'));
         }
         

@@ -1,0 +1,203 @@
+/* Critical CSS - Above the fold content for main page */
+/* This CSS is loaded inline for faster initial render */
+
+/* CSS Variables for consistent theming */
+:root {
+    --primary-green: #10b981;
+    --primary-green-light: #34d399;
+    --primary-green-dark: #059669;
+    --accent-gold: #f59e0b;
+    --accent-gold-light: #fbbf24;
+    --background-dark: #0f0f0f;
+    --background-darker: #0a0a0a;
+    --background-card: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --border-subtle: rgba(255, 255, 255, 0.1);
+}
+
+/* Reset and base styles */
+.coffee-app {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--background-darker);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+.coffee-app * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Navbar - Critical for initial render */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 6%;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 70px;
+}
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.logo-japanese {
+    font-size: 2.5rem;
+    font-weight: 400;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+}
+
+/* Hero Section - Critical */
+.hero {
+    min-height: 100vh;
+    position: relative;
+    padding-top: 70px;
+    overflow: hidden;
+    background: var(--background-darker);
+}
+
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+}
+
+.carousel-slide.active {
+    opacity: 1;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.7) contrast(1.1);
+}
+
+.carousel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg, 
+        rgba(15, 15, 15, 0.8) 0%, 
+        rgba(15, 15, 15, 0.4) 50%,
+        rgba(16, 185, 129, 0.1) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 6%;
+    z-index: 2;
+}
+
+.hero-content {
+    max-width: 600px;
+}
+
+.japanese-title {
+    font-size: 6rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    margin-bottom: 2.5rem;
+    color: var(--text-primary);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.hero-description {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 600px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .navbar-content {
+        padding: 1rem 4%;
+    }
+    
+    .hero {
+        min-height: 60vh;
+        padding-top: 70px;
+    }
+    
+    .carousel-container {
+        height: 60vh;
+    }
+    
+    .japanese-title {
+        font-size: 3.5rem;
+    }
+    
+    .main-title {
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+    
+    .hero-description {
+        font-size: 0.95rem;
+    }
+}
+

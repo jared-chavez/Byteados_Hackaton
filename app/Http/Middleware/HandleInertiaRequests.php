@@ -17,9 +17,25 @@ class HandleInertiaRequests extends Middleware
 
     /**
      * Determine the current asset version.
+     * Usa el hash del manifest para invalidar caché cuando cambian los assets.
      */
     public function version(Request $request): ?string
     {
+        // Obtener la versión del manifest de Vite
+        $manifestPath = public_path('build/manifest.json');
+        
+        if (file_exists($manifestPath)) {
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            // Usar el hash del archivo app.jsx como versión
+            if (isset($manifest['resources/js/app.jsx']['file'])) {
+                // Extraer el hash del nombre del archivo (ej: app-DPzbanP8.js -> DPzbanP8)
+                preg_match('/app-([a-zA-Z0-9]+)\.js/', $manifest['resources/js/app.jsx']['file'], $matches);
+                if (isset($matches[1])) {
+                    return $matches[1];
+                }
+            }
+        }
+        
         return parent::version($request);
     }
 

@@ -1,5 +1,8 @@
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import LazyImage from '@/Components/LazyImage';
+import { loginSchema, validateForm } from '@/validations/authSchemas';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -8,11 +11,26 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
+    const [validationErrors, setValidationErrors] = useState({});
+
     const submit = (e) => {
         e.preventDefault();
 
+        // Validar con schema
+        const validation = validateForm(loginSchema, data);
+        if (!validation.success) {
+            setValidationErrors(validation.errors);
+            return;
+        }
+
+        // Limpiar errores de validación del cliente
+        setValidationErrors({});
+
         post(route('login'), {
             onFinish: () => reset('password'),
+            onError: () => {
+                // Los errores del servidor se manejan automáticamente por Inertia
+            },
         });
     };
 
@@ -23,9 +41,9 @@ export default function Login({ status, canResetPassword }) {
             {/* Left side - Image */}
             <div className="hidden lg:flex lg:w-1/2 bg-gray-100 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 to-transparent z-10"></div>
-                <img 
-                    src="/images/auth-bg.jpg" 
-                    alt="Architecture" 
+                <LazyImage
+                    src="/images/auth-bg.webp"
+                    alt="Architecture"
                     className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-8 left-8 z-20 text-white max-w-md">
@@ -49,51 +67,109 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                     )}
 
-                    <form onSubmit={submit} className="space-y-6">
+                    <form onSubmit={submit} className="space-y-6" noValidate aria-label="Formulario de inicio de sesión">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                                Correo electrónico *
+                                Correo electrónico <span className="text-red-400" aria-label="requerido">*</span>
                             </label>
                             <input
                                 id="email"
                                 name="email"
                                 type="email"
                                 value={data.email}
-                                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                required
+                                aria-required="true"
+                                aria-invalid={!!(validationErrors.email || errors.email)}
+                                aria-describedby={validationErrors.email || errors.email ? "email-error" : undefined}
+                                className={`w-full px-4 py-3 bg-gray-900 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                                    (validationErrors.email || errors.email) 
+                                        ? 'border-red-500 focus:ring-red-500' 
+                                        : 'border-gray-700'
+                                }`}
                                 placeholder="alumno@alumno.utc.edu.mx"
                                 autoComplete="username"
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
+                                onChange={(e) => {
+                                    setData('email', e.target.value);
+                                    // Limpiar error al escribir
+                                    if (validationErrors.email) {
+                                        setValidationErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors.email;
+                                            return newErrors;
+                                        });
+                                    }
+                                }}
+                                onBlur={() => {
+                                    // Validar al salir del campo
+                                    const validation = validateForm(loginSchema, { ...data, email: data.email });
+                                    if (!validation.success && validation.errors.email) {
+                                        setValidationErrors(prev => ({ ...prev, email: validation.errors.email }));
+                                    }
+                                }}
                             />
-                            <InputError message={errors.email} className="mt-2 text-red-400" />
+                            {(validationErrors.email || errors.email) && (
+                                <p id="email-error" className="mt-2 text-sm text-red-400" role="alert" aria-live="polite">
+                                    {validationErrors.email || errors.email}
+                                </p>
+                            )}
                         </div>
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                                Contraseña *
+                                Contraseña <span className="text-red-400" aria-label="requerido">*</span>
                             </label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
                                 value={data.password}
-                                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                required
+                                aria-required="true"
+                                aria-invalid={!!(validationErrors.password || errors.password)}
+                                aria-describedby={validationErrors.password || errors.password ? "password-error" : undefined}
+                                className={`w-full px-4 py-3 bg-gray-900 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                                    (validationErrors.password || errors.password) 
+                                        ? 'border-red-500 focus:ring-red-500' 
+                                        : 'border-gray-700'
+                                }`}
                                 placeholder="••••••••••••"
                                 autoComplete="current-password"
-                                onChange={(e) => setData('password', e.target.value)}
-                                required
+                                onChange={(e) => {
+                                    setData('password', e.target.value);
+                                    // Limpiar error al escribir
+                                    if (validationErrors.password) {
+                                        setValidationErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors.password;
+                                            return newErrors;
+                                        });
+                                    }
+                                }}
+                                onBlur={() => {
+                                    // Validar al salir del campo
+                                    const validation = validateForm(loginSchema, { ...data, password: data.password });
+                                    if (!validation.success && validation.errors.password) {
+                                        setValidationErrors(prev => ({ ...prev, password: validation.errors.password }));
+                                    }
+                                }}
                             />
-                            <InputError message={errors.password} className="mt-2 text-red-400" />
+                            {(validationErrors.password || errors.password) && (
+                                <p id="password-error" className="mt-2 text-sm text-red-400" role="alert" aria-live="polite">
+                                    {validationErrors.password || errors.password}
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <label className="flex items-center">
+                            <label className="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
+                                    id="remember"
                                     name="remember"
                                     checked={data.remember}
                                     onChange={(e) => setData('remember', e.target.checked)}
                                     className="w-4 h-4 text-green-500 bg-gray-900 border-gray-700 rounded focus:ring-green-500 focus:ring-2"
+                                    aria-label="Recordar sesión"
                                 />
                                 <span className="ml-2 text-sm text-gray-300">Recordarme</span>
                             </label>
@@ -101,7 +177,8 @@ export default function Login({ status, canResetPassword }) {
                             {canResetPassword && (
                                 <Link
                                     href={route('password.request')}
-                                    className="text-sm text-green-400 hover:underline"
+                                    className="text-sm text-green-400 hover:underline focus:outline-none focus:ring-2 focus:ring-green-500 rounded px-1"
+                                    aria-label="Recuperar contraseña olvidada"
                                 >
                                     ¿Olvidaste tu contraseña?
                                 </Link>
@@ -111,7 +188,9 @@ export default function Login({ status, canResetPassword }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-3 px-4 rounded-lg transition duration-200"
+                            aria-busy={processing}
+                            aria-label={processing ? 'Iniciando sesión, por favor espera' : 'Iniciar sesión'}
+                            className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black"
                         >
                             {processing ? 'Iniciando sesión...' : 'Iniciar sesión'}
                         </button>
@@ -120,7 +199,8 @@ export default function Login({ status, canResetPassword }) {
                             <span className="text-gray-400 text-sm">¿No tienes una cuenta? </span>
                             <Link
                                 href={route('register')}
-                                className="text-green-400 hover:underline text-sm font-medium"
+                                className="text-green-400 hover:underline text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500 rounded px-1"
+                                aria-label="Ir a la página de registro"
                             >
                                 Registrarse
                             </Link>

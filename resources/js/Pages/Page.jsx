@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 import '../../css/page.css';
 
-export default function Page({ auth }) {
+export default function Page() {
+    const { auth } = usePage().props;
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const totalSlides = 2;
 
-    // Auto-slide functionality
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentSlideIndex((prev) => (prev + 1) % totalSlides);
-        }, 60000); // Change slide every 1 minute (60 seconds)
+        }, 5000); 
 
         return () => clearInterval(interval);
     }, []);
-
-    // Update slides visibility
+    
     useEffect(() => {
         const slides = document.querySelectorAll('.carousel-slide');
         const dots = document.querySelectorAll('.dot');
@@ -41,51 +41,72 @@ export default function Page({ auth }) {
     const currentSlide = (index) => {
         setCurrentSlideIndex(index - 1);
     };
+    
     return (
         <div className="coffee-app">
-            {/* Navbar */}
             <nav className="navbar">
                 <div className="navbar-content">
                     <div className="navbar-logo">
-                        <span className="logo-japanese">☕</span>
+                        <img src="/images/logo.png" alt="XpressUTC Logo" className="logo" />
                         <span className="logo-text">XpressUTC</span>
                     </div>
                     
-                    <div className="navbar-links">
-                        <a href="#inicio" className="navbar-link">Inicio</a>
-                        <a href="#menu" className="navbar-link">Menú</a>
-                        <a href="#contacto" className="navbar-link">Contacto</a>
-                    </div>
+                    <button 
+                        className={`hamburger ${isMenuOpen ? 'active' : ''}`}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        aria-label="Toggle menu"
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
                     
-                    <div className="navbar-buttons">
-                        {auth?.user ? (
-                            <Link
-                                href={route('dashboard')}
-                                className="navbar-btn navbar-btn-green"
+                    <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
+                        <div className="navbar-links">
+                            <Link href="/" className="navbar-link" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
+                            <Link href={route('menu.index')} className="navbar-link" onClick={() => setIsMenuOpen(false)}>Menú</Link>
+                            {/* Enlace de contacto oculto temporalmente */}
+                            {/* <Link
+                                href={route('contact.index')}
+                                className="navbar-link"
+                                onClick={() => setIsMenuOpen(false)}
                             >
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <>
+                                Contacto
+                            </Link> */}
+                        </div>
+                        
+                        <div className="navbar-buttons">
+                            {auth?.user ? (
                                 <Link
-                                    href={route('login')}
-                                    className="navbar-btn navbar-btn-green-outline"
-                                >
-                                    Iniciar Sesión
-                                </Link>
-                                <Link
-                                    href={route('register')}
+                                    href={route('dashboard')}
                                     className="navbar-btn navbar-btn-green"
+                                    onClick={() => setIsMenuOpen(false)}
                                 >
-                                    Registrarse
+                                    Dashboard
                                 </Link>
-                            </>
-                        )}
+                            ) : (
+                                <>
+                                    <Link
+                                        href={route('login')}
+                                        className="navbar-btn navbar-btn-green-outline"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        Iniciar Sesión
+                                    </Link>
+                                    <Link
+                                        href={route('register')}
+                                        className="navbar-btn navbar-btn-green"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        Registrarse
+                                    </Link>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </nav>
 
-            {/* Hero Section */}
             <section className="hero">
                 <div className="hero-carousel">
                     <div className="carousel-container">
@@ -93,8 +114,7 @@ export default function Page({ auth }) {
                             <img src="/images/cafeteria1.png" alt="Cafetería UTC - Ambiente 1" />
                             <div className="carousel-overlay">
                                 <div className="hero-content">
-                                    <h1 className="japanese-title">☕</h1>
-                                    <h2 className="main-title">ARTE DEL CAFÉ</h2>
+                                    <h2 className="main-title">Más Universidad</h2>
                                     <p className="hero-description">
                                         Descubre la perfecta armonía entre sabor, ambiente y estudio. Un espacio diseñado para la excelencia académica y el placer gastronómico.
                                     </p>
@@ -105,7 +125,6 @@ export default function Page({ auth }) {
                             <img src="/images/cafeteria2.png" alt="Cafetería UTC - Ambiente 2" />
                             <div className="carousel-overlay">
                                 <div className="hero-content">
-                                    <h1 className="japanese-title">📚</h1>
                                     <h2 className="main-title">SANTUARIO DE ESTUDIO</h2>
                                     <p className="hero-description">
                                         Donde cada sorbo inspira y cada momento cuenta. Tu refugio académico en el corazón del campus universitario.
@@ -129,251 +148,203 @@ export default function Page({ auth }) {
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section className="features">
-                <div className="feature-item">
-                    <div className="feature-icon icon-1">📶</div>
-                    <h3>CONECTIVIDAD</h3>
-                    <p>WiFi de alta velocidad y espacios con tomas eléctricas para una experiencia de estudio sin interrupciones</p>
+            {/* Services Section */}
+            <section className="services-section">
+                <div className="services-container">
+                    <div className="services-header">
+                        <span className="section-label">— Servicios</span>
+                        <h2 className="section-title">
+                            Servicios <span className="highlight-text">Que Ofrecemos</span>
+                        </h2>
+                    </div>
                 </div>
-                <div className="feature-item">
-                    <div className="feature-icon icon-2">🎯</div>
-                    <h3>AMBIENTE PREMIUM</h3>
-                    <p>Diseño acústico optimizado y iluminación natural para maximizar tu concentración y productividad</p>
-                </div>
-                <div className="feature-item">
-                    <div className="feature-icon icon-3">⏰</div>
-                    <h3>HORARIOS FLEXIBLES</h3>
-                    <p>Abierto desde las 6:00 AM hasta las 9:00 PM para adaptarse a tu rutina académica</p>
+
+                <div className="services-grid">
+                    <div className="service-card">
+                        <div className="service-icon">✨☕️</div>
+                        <h3 className="service-title">Café Premium</h3>
+                        <p className="service-description">
+                            Disfruta de nuestros cafés especiales preparados con granos seleccionados y técnicas artesanales.
+                        </p>
+                        <Link href={route('menu.index')} className="service-link">
+                            Conoce más <span>→</span>
+                        </Link>
+                    </div>
+
+                    <div className="service-card">
+                        <div className="service-icon">⭐🧁</div>
+                        <h3 className="service-title">Repostería</h3>
+                        <p className="service-description">
+                            Deléitate con nuestra selección de pasteles, galletas y postres hechos diariamente.
+                        </p>
+                        <Link href={route('menu.index')} className="service-link">
+                            Conoce más <span>→</span>
+                        </Link>
+                    </div>
+
+                    <div className="service-card">
+                        <div className="service-icon">📚</div>
+                        <h3 className="service-title">Espacio de Estudio</h3>
+                        <p className="service-description">
+                            Ambiente tranquilo con WiFi de alta velocidad, enchufes y zonas diseñadas para estudiar.
+                        </p>
+                        <Link href={route('menu.index')} className="service-link">
+                            Conoce más <span>→</span>
+                        </Link>
+                    </div>
                 </div>
             </section>
 
-            {/* What We Offer Section */}
-            <section className="what-we-offer">
-                <h2>LO QUE OFRECEMOS</h2>
-                <p>Una experiencia gastronómica cuidadosamente curada para la comunidad académica. Cada producto refleja nuestro compromiso con la calidad, la innovación y el bienestar estudiantil.</p>
-                
-                <div className="offer-grid">
-                    <div className="offer-item">
-                        <div className="offer-image offer-1"></div>
-                        <h3>CAFÉ ESPECIALIZADO</h3>
-                        <p>Granos selectos de origen único</p>
+            {/* About Section */}
+            <section className="about-section">
+                <div className="about-container">
+                    <div className="about-image-wrapper">
+                        <div className="about-circle">
+                            <img src="/images/barista.jpg" alt="Nuestro Barista" className="about-image" />
+                            <div className="skill-badge badge-1">Bebidas,comidas,snacks</div>
+                            <div className="skill-badge badge-2">Atención Personalizada</div>
+                            <div className="skill-badge badge-3">Productos Frescos</div>
+                            <div className="skill-badge badge-4">Ambiente Acogedor</div>
+                        </div>
                     </div>
-                    <div className="offer-item">
-                        <div className="offer-image offer-2"></div>
-                        <h3>BOWLS SALUDABLES</h3>
-                        <p>Nutrición balanceada para el cerebro</p>
-                    </div>
-                    <div className="offer-item">
-                        <div className="offer-image offer-3"></div>
-                        <h3>BATIDOS FRESCOS</h3>
-                        <p>Energía natural en cada sorbo</p>
-                    </div>
-                    <div className="offer-item">
-                        <div className="offer-image offer-4"></div>
-                        <h3>SNACKS GOURMET</h3>
-                        <p>Sabores sofisticados y saludables</p>
+
+                    <div className="about-content">
+                        <span className="section-label">Acerca de Nosotros</span>
+                        <h2 className="section-title">
+                            ¿Qué es <span className="highlight-text">XpressUTC?</span>
+                        </h2>
+                        <p className="about-description">
+                            Somos más que una cafetería universitaria. Somos el punto de encuentro perfecto donde los estudiantes encuentran inspiración, energía y el ambiente ideal para estudiar o compartir con amigos.
+                        </p>
+
+                        <div className="about-stats">
+                            <div className="stat-item">
+                                <h3 className="stat-number">500+</h3>
+                                <p className="stat-label">Estudiantes Diarios</p>
+                            </div>
+                            <div className="stat-item">
+                                <h3 className="stat-number">30+</h3>
+                                <p className="stat-label">Productos Diferentes</p>
+                            </div>
+                            <div className="stat-item">
+                                <h3 className="stat-number">30</h3>
+                                <p className="stat-label">Años de Experiencia</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Quote Section */}
-            <section className="quote-section">
-                <div className="quote-content">
-                    <blockquote>
-                        "Solo los mejores granos merecen crear una gran taza de café"
-                    </blockquote>
-                    <cite>— Filosofía de la Excelencia</cite>
+            {/* Testimonials Section */}
+            <section className="testimonials-section">
+                <div className="testimonials-header">
+                    <h2 className="testimonials-title">Testimonios</h2>
+                    <p className="testimonials-description">
+                        Descubre lo que nuestros estudiantes dicen sobre su experiencia en XpressUTC. 
+                        Un espacio donde el café se encuentra con la comunidad universitaria.
+                    </p>
                 </div>
-                <div className="smoke-effect"></div>
             </section>
 
-            {/* Special Menu Section */}
-            <section className="special-menu">
-                <h2>MENÚ ESPECIAL</h2>
-                <p>Creaciones exclusivas que combinan tradición culinaria con innovación gastronómica. Cada plato es una experiencia diseñada para nutrir tanto el cuerpo como la mente académica.</p>
-                
+            {/* Menu Section */}
+            <section className="menu-section">
+                <h2 className="section-title-center">Nuestro Menú</h2>
+
                 <div className="menu-grid">
-                    <div className="menu-item featured">
-                        <div className="menu-badge">MÁS POPULAR</div>
-                        <div className="menu-image menu-1"></div>
-                        <h3>COMBO ESTUDIANTE</h3>
-                        <p>Café premium + sándwich artesanal + galleta casera</p>
-                        <span className="price">$8.500</span>
-                        <div className="savings">Ahorra $2.500</div>
+                    <div className="menu-card">
+                        <img src="/images/snacks.jpg" alt="Snacks" className="menu-image" />
+                        <div className="menu-info">
+                            <h3 className="menu-item-title">Snacks</h3>
+                            <Link href={route('menu.index')} className="menu-btn">Ver Menu</Link>
+                        </div>
                     </div>
-                    <div className="menu-item">
-                        <div className="menu-image menu-2"></div>
-                        <h3>RITUAL MATUTINO</h3>
-                        <p>Café especializado + tostada integral + jugo natural</p>
-                        <span className="price">$12.000</span>
-                        <div className="savings">Ahorra $3.000</div>
+
+                    <div className="menu-card">
+                        <img src="/images/comida.jpg" alt="Comida" className="menu-image" />
+                        <div className="menu-info">
+                            <h3 className="menu-item-title">Comida</h3>
+                            <Link href={route('menu.index')} className="menu-btn">Ver Menu</Link>
+                        </div>
                     </div>
-                    <div className="menu-item healthy">
-                        <div className="menu-badge healthy-badge">BIENESTAR</div>
-                        <div className="menu-image menu-3"></div>
-                        <h3>BOWL ENERGÉTICO</h3>
-                        <p>Batido de superalimentos + ensalada de quinoa + fruta de temporada</p>
-                        <span className="price">$15.000</span>
-                        <div className="savings">Ahorra $4.000</div>
-                    </div>
-                    <div className="menu-item study-pack">
-                        <div className="menu-badge study-badge">ZONA ESTUDIO</div>
-                        <div className="menu-image menu-4"></div>
-                        <h3>PACK CONCENTRACIÓN</h3>
-                        <p>Café grande + snack cerebral + WiFi premium</p>
-                        <span className="price">$10.000</span>
-                        <div className="study-perks">+ Mesa reservada 3hrs</div>
+
+                    <div className="menu-card">
+                        <img src="/images/bebidas.jpg" alt="Bebidas" className="menu-image" />
+                        <div className="menu-info">
+                            <h3 className="menu-item-title">Bebidas</h3>
+                            <Link href={route('menu.index')} className="menu-btn">Ver Menu</Link>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Student Benefits Section */}
-            <section className="student-benefits">
-                <h2>PRIVILEGIOS EXCLUSIVOS</h2>
-                <div className="benefits-grid">
-                    <div className="benefit-card">
-                        <div className="benefit-icon">🎓</div>
-                        <h3>DESCUENTO ACADÉMICO</h3>
-                        <p>15% de descuento con carnet estudiantil válido - apoyamos tu trayectoria educativa</p>
-                        <div className="benefit-highlight">Válido todos los días</div>
+            {/* Projects/Gallery Section */}
+            <section className="projects-section">
+                <h2 className="section-title-center">Nuestros Espacios</h2>
+                                
+                <div className="projects-grid">
+                    <div className="project-card">
+                        <img src="/images/Zona_Estudio.jpg" alt="Zona de Estudio Individual" className="project-image" />
+                        <div className="project-content">
+                            <h3 className="project-title">Zona de Estudio Individual</h3>
+                            <p className="project-description">
+                                Espacios diseñados para concentración máxima con iluminación perfecta y comodidad.
+                            </p>
+                            <button className="project-btn">Conoce más</button>
+                        </div>
                     </div>
-                    <div className="benefit-card">
-                        <div className="benefit-icon">⏰</div>
-                        <h3>HORA DE ESTUDIO ESPECIAL</h3>
-                        <p>2x1 en café durante horas pico de estudio (2:00 PM - 4:00 PM)</p>
-                        <div className="benefit-highlight">Perfecto para sesiones grupales</div>
+
+                    <div className="project-card project-card-reverse">
+                        <div className="project-content">
+                            <h3 className="project-title">Área de Grupos</h3>
+                            <p className="project-description">
+                                Mesas amplias para trabajos en equipo y discusiones académicas productivas.
+                            </p>
+                            <button className="project-btn">Conoce más</button>
+                        </div>
+                        <img src="/images/Area_Grupos.jpg" alt="Área de Grupos" className="project-image" />
                     </div>
-                    <div className="benefit-card">
-                        <div className="benefit-icon">📚</div>
-                        <h3>ZONA PREMIUM DE ESTUDIO</h3>
-                        <p>Mesas silenciosas reservadas con cualquier compra superior a $15.000</p>
-                        <div className="benefit-highlight">Silencio garantizado</div>
-                    </div>
-                    <div className="benefit-card">
-                        <div className="benefit-icon">🏆</div>
-                        <h3>PROGRAMA DE FIDELIDAD</h3>
-                        <p>Gana puntos con cada compra, canjea recompensas exclusivas</p>
-                        <div className="benefit-highlight">10 visitas = 1 café gratis</div>
+
+                    <div className="project-card">
+                        <img src="/images/Zona_Relajacion.jpg" alt="Zona de Relajación" className="project-image" />
+                        <div className="project-content">
+                            <h3 className="project-title">Zona de Relajación</h3>
+                            <p className="project-description">
+                                Espacio cómodo para descansar entre clases y socializar con amigos.
+                            </p>
+                            <button className="project-btn">Conoce más</button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Live Features Section */}
-            <section className="live-features">
-                <h2>LIVE NOW</h2>
-                <div className="live-grid">
-                    <div className="live-card">
-                        <div className="live-indicator">🔴 LIVE</div>
-                        <h3>CURRENT CAPACITY</h3>
-                        <div className="occupancy-meter">
-                            <div className="occupancy-bar" style={{width: '65%'}}></div>
-                        </div>
-                        <p>65% occupied - Tables still available</p>
-                    </div>
-                    <div className="live-card">
-                        <div className="live-indicator">⏱️ REAL TIME</div>
-                        <h3>WAIT TIME</h3>
-                        <div className="wait-time">3-5 min</div>
-                        <p>Average preparation time</p>
-                    </div>
-                    <div className="live-card">
-                        <div className="live-indicator">🎵 NOW PLAYING</div>
-                        <h3>AMBIENT SOUND</h3>
-                        <div className="music-genre">Lo-Fi Study Beats</div>
-                        <p>Perfect for concentration</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Social Proof Section */}
-            <section className="social-proof">
-                <h2>STUDENT VOICES</h2>
-                <div className="testimonials-grid">
-                    <div className="testimonial-card">
-                        <div className="stars">⭐⭐⭐⭐⭐</div>
-                        <p>"An oasis of tranquility in the academic chaos. The coffee is exceptional and the atmosphere inspires deep focus. This place has become essential to my study routine."</p>
-                        <div className="student-info">
-                            <strong>María González</strong>
-                            <span>Systems Engineering - 7th semester</span>
-                        </div>
-                    </div>
-                    <div className="testimonial-card">
-                        <div className="stars">⭐⭐⭐⭐⭐</div>
-                        <p>"Every detail here is thoughtfully designed for the academic mind. From the lighting to the acoustics, everything supports concentration and creativity."</p>
-                        <div className="student-info">
-                            <strong>Carlos Mendoza</strong>
-                            <span>Business Administration - 5th semester</span>
-                        </div>
-                    </div>
-                    <div className="testimonial-card">
-                        <div className="stars">⭐⭐⭐⭐⭐</div>
-                        <p>"More than a café, it's a sanctuary for intellectual growth. The quality of both the food and the environment exceeds all expectations."</p>
-                        <div className="student-info">
-                            <strong>Ana Rodríguez</strong>
-                            <span>Psychology - 3rd semester</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="social-stats">
-                    <div className="stat">
-                        <div className="stat-number">4.9/5</div>
-                        <div className="stat-label">Average rating</div>
-                    </div>
-                    <div className="stat">
-                        <div className="stat-number">3,247</div>
-                        <div className="stat-label">Satisfied students</div>
-                    </div>
-                    <div className="stat">
-                        <div className="stat-number">98%</div>
-                        <div className="stat-label">Recommend XpressUTC</div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Philosophy Section */}
-            <section className="philosophy">
-                <div className="philosophy-content">
-                    <h2>Our Gastronomy Philosophy</h2>
-                    <p>We believe in the perfect alchemy between exceptional flavor and inspiring atmosphere. Each cup of coffee is an invitation to excellence, each space is designed to awaken academic creativity. Our philosophy transcends the gastronomic: we are architects of experiences that nourish both intellect and senses, creating the perfect sanctuary where ideas flourish and academic dreams take shape.</p>
+            {/* Newsletter Section */}
+            <section className="newsletter-section">
+                <div className="newsletter-content">
+                    <h2 className="newsletter-title">
+                        ¿Quieres recibir nuestras ofertas y novedades?
+                    </h2>
+                    <p className="newsletter-description">
+                        Suscríbete a nuestro boletín y recibe promociones exclusivas para estudiantes.
+                    </p>
+                    <button className="newsletter-btn">Suscribirse</button>
                 </div>
             </section>
 
             {/* Footer */}
             <footer className="footer">
                 <div className="footer-content">
-                    <div className="footer-section">
-                        <h3>OPEN HOURS</h3>
-                        <p>
-                            Monday - Friday<br/>
-                            6:00 AM - 9:00 PM<br/>
-                            Saturday<br/>
-                            8:00 AM - 6:00 PM<br/>
-                            Sunday: Closed
-                        </p>
+                    <div className="footer-logos">
+                        <img src="/images/Logo-mas-universidad-pie-de-pagina.png" alt="Más Universidad" className="footer-logo" />
+                        <img src="/images/logo.png" alt="XpressUTC Logo" className="footer-logo" />
                     </div>
-                    <div className="footer-section">
-                        <h3>AMENITIES</h3>
-                        <p>
-                            High-speed WiFi<br/>
-                            Study spaces<br/>
-                            Power outlets<br/>
-                            Climate control<br/>
-                            Curated playlists
-                        </p>
-                    </div>
-                    <div className="footer-section">
-                        <h3>LOCATION</h3>
-                        <p>
-                            UTC Campus<br/>
-                            Central Building, Ground Floor<br/>
-                            Cartagena, Colombia<br/>
-                            Tel: (605) 123-4567<br/>
-                            Email: cafe@utc.edu.co
-                        </p>
-                    </div>
-                    <div className="footer-section">
-                        <div className="map-placeholder"></div>
+                    <div className="footer-locations">
+                        <h3>UBICACIONES</h3>
+                        <div className="location-item">
+                            <p><strong>Cafetería 1:</strong> Ubicada bajo el edificio 1</p>
+                        </div>
+                        <div className="location-item">
+                            <p><strong>Cafetería 2:</strong> Ubicada a un costado de la biblioteca</p>
+                        </div>
                     </div>
                 </div>
             </footer>

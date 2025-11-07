@@ -1,7 +1,11 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FaShoppingCart } from 'react-icons/fa';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmModal, { useConfirmModal } from '@/Components/ConfirmModal';
+import '../../css/dashboard.css';
 
 function formatTimeRemaining(expiresAt) {
     if (!expiresAt) return null;
@@ -22,6 +26,7 @@ export default function Cart({ cart: initialCart, total: initialTotal, total_ite
     const [cart, setCart] = useState(initialCart);
     const [quantities, setQuantities] = useState({});
     const [timeRemaining, setTimeRemaining] = useState(null);
+    const { showConfirm, confirm } = useConfirmModal();
 
     useEffect(() => {
         // Siempre cargar desde la API para asegurar que tenemos los datos más recientes
@@ -127,189 +132,279 @@ export default function Cart({ cart: initialCart, total: initialTotal, total_ite
     };
 
     const handleRemoveItem = async (itemId) => {
-        if (!window.confirm('¿Eliminar este producto del carrito?')) return;
-
-        try {
-            await axios.delete(`/api/v1/cart/items/${itemId}`);
-            loadCart();
-            toast.success('Producto eliminado del carrito');
-        } catch (error) {
-            toast.error('Error al eliminar producto');
-        }
+        showConfirm({
+            title: 'Eliminar producto',
+            message: '¿Estás seguro de que deseas eliminar este producto del carrito?',
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`/api/v1/cart/items/${itemId}`);
+                    loadCart();
+                    toast.success('Producto eliminado del carrito');
+                } catch (error) {
+                    toast.error('Error al eliminar producto');
+                }
+            },
+        });
     };
 
     const handleClearCart = async () => {
-        if (!window.confirm('¿Vaciar todo el carrito?')) return;
-
-        try {
-            await axios.delete('/api/v1/cart/clear');
-            loadCart();
-            toast.success('Carrito vaciado');
-        } catch (error) {
-            toast.error('Error al vaciar carrito');
-        }
+        showConfirm({
+            title: 'Vaciar carrito',
+            message: '¿Estás seguro de que deseas vaciar todo el carrito? Esta acción no se puede deshacer.',
+            confirmText: 'Vaciar carrito',
+            cancelText: 'Cancelar',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    await axios.delete('/api/v1/cart/clear');
+                    loadCart();
+                    toast.success('Carrito vaciado');
+                } catch (error) {
+                    toast.error('Error al vaciar carrito');
+                }
+            },
+        });
     };
 
     // Verificar si el carrito está vacío
     const isEmpty = !cart || !cart.items || !Array.isArray(cart.items) || cart.items.length === 0;
     
-    // Debug: mostrar estado del carrito
-    console.log('Cart state:', {
-        cart,
-        hasCart: !!cart,
-        hasItems: !!cart?.items,
-        itemsIsArray: Array.isArray(cart?.items),
-        itemsLength: cart?.items?.length,
-        isEmpty
-    });
+    const subtotal = cart?.total || 0;
+    const tax = subtotal * 0.16;
+    const total = subtotal + tax;
+    const totalItems = cart?.total_items || 0;
 
-    if (isEmpty) {
-        return (
-            <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-                <Head title="Carrito" />
-                <h1>Carrito - Testing</h1>
-                <p>El carrito está vacío</p>
+    const handleQuantityDecrease = (itemId, currentQty) => {
+        if (currentQty > 1) {
+            handleUpdateQuantity(itemId, currentQty - 1);
+        }
+    };
+
+    const handleQuantityIncrease = (itemId, currentQty, maxStock) => {
+        if (currentQty < maxStock) {
+            handleUpdateQuantity(itemId, currentQty + 1);
+        }
+    };
+
+    const CartEmptyState = () => (
+        <div className="cart-page">
+            <div className="cart-container">
+                <div className="cart-empty">
+                        <div className="cart-empty-icon" aria-hidden="true">
+                            <FaShoppingCart size={48} />
+                    </div>
+                    <h2 className="cart-empty-title">Tu Carrito Está Vacío</h2>
+                    <p className="cart-empty-text">
+                        Parece que aún no has agregado productos a tu carrito. 
+                        Explora nuestro menú y descubre nuestras deliciosas opciones.
+                    </p>
                 <button
                     onClick={() => router.visit(route('menu.index'))}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        cursor: 'pointer',
-                        marginTop: '10px'
-                    }}
-                >
-                    Ir al Menú
+                        className="dashboard-btn dashboard-btn-primary"
+                    >
+                        Explorar Menú
                 </button>
+                </div>
+            </div>
             </div>
         );
-    }
 
-    return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <Head title="Carrito" />
-            
-            <h1>Carrito - Testing</h1>
-
-            <div style={{ marginBottom: '20px' }}>
+    const CartWithItems = () => (
+        <div className="cart-page">
+            <div className="cart-container">
+                <div className="cart-header">
+                    <h1 className="cart-title">Mi Carrito</h1>
+                    <div className="cart-actions-top">
                 <button
                     onClick={() => router.visit(route('menu.index'))}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#6c757d',
-                        color: 'white',
-                        border: 'none',
-                        cursor: 'pointer',
-                        marginRight: '10px'
-                    }}
+                            className="dashboard-btn dashboard-btn-secondary"
                 >
                     Continuar Comprando
                 </button>
                 <button
                     onClick={handleClearCart}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        cursor: 'pointer'
-                    }}
+                            className="dashboard-btn dashboard-btn-danger"
                 >
                     Vaciar Carrito
                 </button>
             </div>
+                </div>
 
-            <div style={{ marginBottom: '20px' }}>
-                <h2>Items del Carrito</h2>
-                {cart.items.map(item => (
-                    <div
-                        key={item.id}
-                        style={{
-                            border: '1px solid #ddd',
-                            padding: '15px',
-                            marginBottom: '10px',
-                            borderRadius: '5px'
-                        }}
-                    >
-                        <h3>{item.product?.name || 'Producto'}</h3>
-                        <p><strong>Precio unitario:</strong> ${item.price}</p>
-                        <p><strong>Subtotal:</strong> ${(item.quantity * item.price).toFixed(2)}</p>
-                        {item.special_instructions && (
-                            <p><strong>Instrucciones:</strong> {item.special_instructions}</p>
-                        )}
-                        
-                        <div style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                            <label>
-                                Cantidad:
+                <div className="cart-content">
+                    <div className="cart-items-section">
+                        <div className="cart-items-header">
+                            <h2 className="cart-items-title">Items ({totalItems})</h2>
+                        </div>
+
+                        {cart.items.map(item => {
+                            const currentQty = quantities[item.id] || item.quantity;
+                            const itemSubtotal = currentQty * parseFloat(item.price || 0);
+                            const maxStock = item.product?.stock || 999;
+
+                            return (
+                                <div key={item.id} className="cart-item-card">
+                                    <div className="cart-item-header">
+                                        <h3 className="cart-item-name">
+                                            {item.product?.name || 'Producto'}
+                                        </h3>
+                                        <button
+                                            onClick={() => handleRemoveItem(item.id)}
+                                            className="cart-item-remove"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+
+                                    <div className="cart-item-info">
+                                        <div className="cart-item-info-item">
+                                            <div className="cart-item-info-label">Precio Unitario</div>
+                                            <div className="cart-item-price">
+                                                ${parseFloat(item.price || 0).toFixed(2)}
+                                            </div>
+                                        </div>
+                                        <div className="cart-item-info-item">
+                                            <div className="cart-item-info-label">Categoría</div>
+                                            <div className="cart-item-info-value">
+                                                {item.product?.category?.name || 'N/A'}
+                                            </div>
+                                        </div>
+                                        <div className="cart-item-info-item">
+                                            <div className="cart-item-info-label">Stock Disponible</div>
+                                            <div className="cart-item-info-value">
+                                                {item.product?.stock || 0} unidades
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="cart-item-actions">
+                                        <div className="cart-item-quantity">
+                                            <span className="cart-item-quantity-label">Cantidad:</span>
+                                            <div className="cart-item-quantity-controls">
+                                                <button
+                                                    onClick={() => handleQuantityDecrease(item.id, currentQty)}
+                                                    className="cart-item-quantity-btn"
+                                                    disabled={currentQty <= 1}
+                                                >
+                                                    −
+                                                </button>
                                 <input
                                     type="number"
                                     min="1"
-                                    max={item.product?.stock || 999}
-                                    value={quantities[item.id] || item.quantity}
+                                                    max={maxStock}
+                                                    value={currentQty}
                                     onChange={(e) => setQuantities(prev => ({ ...prev, [item.id]: parseInt(e.target.value) || 1 }))}
                                     onBlur={(e) => handleUpdateQuantity(item.id, e.target.value)}
-                                    style={{
-                                        marginLeft: '5px',
-                                        padding: '5px',
-                                        width: '60px'
-                                    }}
-                                />
-                            </label>
+                                                    className="cart-item-quantity-input"
+                                                />
                             <button
-                                onClick={() => handleRemoveItem(item.id)}
-                                style={{
-                                    padding: '8px 15px',
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Eliminar
+                                                    onClick={() => handleQuantityIncrease(item.id, currentQty, maxStock)}
+                                                    className="cart-item-quantity-btn"
+                                                    disabled={currentQty >= maxStock}
+                                                >
+                                                    +
                             </button>
                         </div>
                     </div>
-                ))}
+                                        <div className="cart-item-subtotal">
+                                            ${itemSubtotal.toFixed(2)}
+                                        </div>
             </div>
 
-            <div style={{
-                border: '2px solid #007bff',
-                padding: '20px',
-                borderRadius: '5px',
-                marginTop: '20px'
-            }}>
-                <h2>Resumen</h2>
+                                    {item.special_instructions && (
+                                        <div className="cart-item-instructions">
+                                            <div className="cart-item-instructions-label">Instrucciones Especiales</div>
+                                            <div className="cart-item-instructions-text">
+                                                {item.special_instructions}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="cart-summary">
+                        <div className="cart-summary-card">
+                            <h2 className="cart-summary-title">Resumen</h2>
+
                 {timeRemaining && (
-                    <p style={{ 
-                        color: timeRemaining === 'Expirado' ? '#dc3545' : '#ffc107',
-                        fontWeight: 'bold',
-                        marginBottom: '10px'
-                    }}>
-                        <strong>Tiempo restante:</strong> {timeRemaining}
-                    </p>
-                )}
-                <p><strong>Total de items:</strong> {cart.total_items || 0}</p>
-                <p><strong>Subtotal:</strong> ${(cart.total || 0).toFixed(2)}</p>
-                <p><strong>IVA (16%):</strong> ${((cart.total || 0) * 0.16).toFixed(2)}</p>
-                <p><strong>Total:</strong> ${((cart.total || 0) * 1.16).toFixed(2)}</p>
-                
+                                <div className={`cart-summary-timer ${timeRemaining === 'Expirado' ? 'expired' : ''}`}>
+                                    <div className="cart-summary-timer-label">Tiempo Restante</div>
+                                    <div className="cart-summary-timer-value">{timeRemaining}</div>
+                                </div>
+                            )}
+
+                            <div className="cart-summary-details">
+                                <div className="cart-summary-line">
+                                    <span className="cart-summary-label">Items</span>
+                                    <span className="cart-summary-value">{totalItems}</span>
+                                </div>
+                                <div className="cart-summary-line">
+                                    <span className="cart-summary-label">Subtotal</span>
+                                    <span className="cart-summary-value">${subtotal.toFixed(2)}</span>
+                                </div>
+                                <div className="cart-summary-line">
+                                    <span className="cart-summary-label">IVA (16%)</span>
+                                    <span className="cart-summary-value">${tax.toFixed(2)}</span>
+                                </div>
+                                <div className="cart-summary-line total">
+                                    <span className="cart-summary-label">Total</span>
+                                    <span className="cart-summary-value">${total.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <div className="cart-summary-actions">
                 <button
                     onClick={() => router.visit(route('checkout.index'))}
-                    style={{
-                        marginTop: '15px',
-                        padding: '12px 30px',
-                        backgroundColor: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '16px'
-                    }}
-                >
-                    Proceder al Checkout
+                                    className="cart-summary-checkout"
+                                    disabled={isEmpty || timeRemaining === 'Expirado'}
+                                >
+                                    <span>Proceder al Checkout</span>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    );
+
+    const { auth } = usePage().props;
+
+    if (isEmpty) {
+        return (
+            <>
+                <Head title="Carrito" />
+                <ConfirmModal confirm={confirm} />
+                {auth?.user ? (
+                    <AuthenticatedLayout>
+                        <CartEmptyState />
+                    </AuthenticatedLayout>
+                ) : (
+                    <CartEmptyState />
+                )}
+            </>
+        );
+    }
+
+    return (
+        <>
+            <Head title="Carrito" />
+            <ConfirmModal confirm={confirm} />
+            {auth?.user ? (
+                <AuthenticatedLayout>
+                    <CartWithItems />
+                </AuthenticatedLayout>
+            ) : (
+                <CartWithItems />
+            )}
+        </>
     );
 }
 

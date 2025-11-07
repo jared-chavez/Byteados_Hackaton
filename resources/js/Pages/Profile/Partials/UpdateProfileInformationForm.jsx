@@ -1,9 +1,7 @@
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import { FaCheckCircle } from 'react-icons/fa';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
@@ -16,6 +14,7 @@ export default function UpdateProfileInformation({
         useForm({
             name: user.name,
             email: user.email,
+            phone: user.phone || '',
         });
 
     const submit = (e) => {
@@ -24,76 +23,115 @@ export default function UpdateProfileInformation({
         patch(route('profile.update'));
     };
 
+    const getUserTypeLabel = (type) => {
+        return type === 'student' ? 'Estudiante' : 'Profesor';
+    };
+
     return (
-        <section className={className}>
-            <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Profile Information
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600">
-                    Update your account's profile information and email address.
+        <div className="profile-card">
+            <div className="profile-card-header">
+                <h2 className="profile-card-title">Información del Perfil</h2>
+                <p className="profile-card-description">
+                    Actualiza la información de tu cuenta y dirección de correo electrónico.
                 </p>
-            </header>
+            </div>
 
-            <form onSubmit={submit} className="mt-6 space-y-6">
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
-                    <TextInput
+            <form onSubmit={submit} className="profile-form">
+                <div className="profile-form-group">
+                    <label htmlFor="name" className="profile-label">
+                        Nombre completo *
+                    </label>
+                    <input
                         id="name"
-                        className="mt-1 block w-full"
+                        type="text"
+                        className="profile-input"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         required
-                        isFocused
                         autoComplete="name"
                     />
-
-                    <InputError className="mt-2" message={errors.name} />
+                    <InputError className="profile-error" message={errors.name} />
                 </div>
 
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
+                <div className="profile-form-group">
+                    <label htmlFor="email" className="profile-label">
+                        Correo electrónico *
+                    </label>
+                    <input
                         id="email"
                         type="email"
-                        className="mt-1 block w-full"
+                        className="profile-input"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         required
                         autoComplete="username"
                     />
+                    <InputError className="profile-error" message={errors.email} />
+                </div>
 
-                    <InputError className="mt-2" message={errors.email} />
+                <div className="profile-form-group">
+                    <label htmlFor="phone" className="profile-label">
+                        Teléfono
+                    </label>
+                    <input
+                        id="phone"
+                        type="tel"
+                        className="profile-input"
+                        value={data.phone}
+                        onChange={(e) => setData('phone', e.target.value)}
+                        autoComplete="tel"
+                        placeholder="1234567890"
+                    />
+                    <InputError className="profile-error" message={errors.phone} />
+                </div>
+
+                <div className="profile-info-grid">
+                    <div className="profile-info-item">
+                        <div className="profile-info-label">Tipo de Usuario</div>
+                        <div className="profile-info-value">{getUserTypeLabel(user.user_type)}</div>
+                    </div>
+                    {user.student_id && (
+                        <div className="profile-info-item">
+                            <div className="profile-info-label">Matrícula</div>
+                            <div className="profile-info-value">{user.student_id}</div>
+                        </div>
+                    )}
+                    <div className="profile-info-item">
+                        <div className="profile-info-label">Estado</div>
+                        <div className="profile-info-value">{user.status === 'active' ? 'Activo' : 'Inactivo'}</div>
+                    </div>
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
-                    <div>
-                        <p className="mt-2 text-sm text-gray-800">
-                            Your email address is unverified.
+                    <div className="profile-verification">
+                        <p className="profile-verification-text">
+                            Tu dirección de correo electrónico no está verificada.
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="profile-verification-link"
                             >
-                                Click here to re-send the verification email.
+                                Haz clic aquí para reenviar el correo de verificación.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 text-sm font-medium text-green-600">
-                                A new verification link has been sent to your
-                                email address.
+                            <div className="profile-verification-success">
+                                Se ha enviado un nuevo enlace de verificación a tu dirección de correo electrónico.
                             </div>
                         )}
                     </div>
                 )}
 
-                <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                <div className="profile-form-actions">
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="dashboard-btn dashboard-btn-primary"
+                    >
+                        {processing ? 'Guardando...' : 'Guardar Cambios'}
+                    </button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -102,12 +140,13 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600">
-                            Saved.
-                        </p>
+                        <div className="profile-success-message">
+                            <FaCheckCircle className="w-5 h-5" />
+                            <span>Guardado exitosamente</span>
+                        </div>
                     </Transition>
                 </div>
             </form>
-        </section>
+        </div>
     );
 }

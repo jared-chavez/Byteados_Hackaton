@@ -26,7 +26,8 @@ class CheckoutController extends Controller
         
         // Verificar que el usuario esté autenticado
         if (!$user) {
-            return redirect()->route('login')->with('message', 'Debes iniciar sesión para realizar el checkout');
+            // Usar Inertia::location para redirecciones en lugar de redirect()
+            return Inertia::location(route('login'));
         }
 
         $sessionId = null;
@@ -34,7 +35,8 @@ class CheckoutController extends Controller
         $cart->load(['items.product.category']);
 
         if ($cart->isEmpty()) {
-            return redirect()->route('cart.index');
+            // Usar Inertia::location para redirecciones en lugar de redirect()
+            return Inertia::location(route('cart.index'));
         }
 
         return Inertia::render('Checkout', [

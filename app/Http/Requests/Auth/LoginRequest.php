@@ -41,6 +41,17 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        // Primero verificar si el usuario existe y está activo
+        $user = \App\Models\User::where('email', $this->string('email'))->first();
+
+        if ($user && $user->status !== 'active') {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Tu cuenta está inactiva o suspendida. Por favor, contacta al administrador.',
+            ]);
+        }
+
         if (! Auth::guard('web')->attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
